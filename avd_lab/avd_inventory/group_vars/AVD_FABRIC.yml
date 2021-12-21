@@ -1,0 +1,125 @@
+# L3LS Fabric Values - update these values with caution,
+# SOME CHANGES COULD BE DISRUPTIVE.
+
+fabric_name: AVD_FABRIC
+
+underlay_routing_protocol: BGP
+
+# Enable vlan aware bundles
+vxlan_vlan_aware_bundles: False
+
+# bgp peer groups passwords
+bgp_peer_groups:
+  IPv4_UNDERLAY_PEERS:
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+  EVPN_OVERLAY_PEERS:
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+  MLAG_IPv4_UNDERLAY_PEER:
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+
+# Spine Switches
+spine:
+  defaults:
+    # IP address range for /32 EVPN loopbacks on spines
+    # Assign range larger then total spines
+    loopback_ipv4_pool: 192.0.255.0/25
+  nodes:
+    spine1:
+      id: 1
+      mgmt_ip: 192.168.123.11/24
+      platform: cEOS
+      bgp_as: 65001
+      mac_address: '0c:1d:c0:1d:62:11'
+    spine2:
+      id: 2
+      mgmt_ip: 192.168.123.12/24
+      platform: cEOS
+      bgp_as: 65001
+      mac_address: '0c:1d:c0:1d:62:12'
+
+# Leaf switch groups
+# A maximum of two nodes can form a leaf group
+# When two nodes are in a leaf group this will automatically form mlag pair
+
+l3leaf:
+  defaults:
+    max_parallel_uplinks: 8
+    max_uplink_switches: 4
+    # IP address range for /32 EVPN loopbacks on leafs
+    # assign range larger then total leafs
+    loopback_ipv4_pool: 192.0.255.128/25
+    vtep_loopback_ipv4_pool: 192.0.254.0/24
+    # adress pool for p2p underlay /31 links between l3leafs and spines
+    # assign range larger then total [Spines * total potential leafs * 2]
+    uplink_ipv4_pool: 172.31.255.0/24
+    # address pool for MLAG peering
+    mlag_peer_ipv4_pool: 10.255.252.0/24
+    # address pool for L3 peering over MLAG peer-link
+    mlag_peer_l3_ipv4_pool: 10.255.251.0/24
+    # virtual router mac for VNIs assigned to Leaf switches
+    # format: xx:xx:xx:xx:xx:xx
+    virtual_router_mac_address: 00:1c:73:00:dc:01
+    spanning_tree_priority: 4096
+    spanning_tree_mode: mstp
+  node_groups:
+    pod0:
+      filter:
+        tenants: ['TENANT_A', 'TENANT_A']
+        tags: ['leaf1', 'l2_only', 'leaf2', 'l2_only']
+      bgp_as: 65101
+      nodes:
+        leaf1:
+          id: 1
+          mgmt_ip: 192.168.123.21/24
+          platform: cEOS
+          uplink_switches: ['spine1', 'spine2']
+          uplink_interfaces: ['Ethernet49/1', 'Ethernet50/1']
+          uplink_switch_interfaces: ['Ethernet1/1', 'Ethernet1/1']
+          mac_address: '0c:1d:c0:1d:62:21'
+          mlag_interfaces: ['Ethernet51/1', 'Ethernet52/1']
+        leaf2:
+          id: 2
+          mgmt_ip: 192.168.123.22/24
+          platform: cEOS
+          uplink_switches: ['spine1', 'spine2']
+          uplink_interfaces: ['Ethernet49/1', 'Ethernet50/1']
+          uplink_switch_interfaces: ['Ethernet2/1', 'Ethernet2/1']
+          mac_address: '0c:1d:c0:1d:62:22'
+          mlag_interfaces: ['Ethernet51/1', 'Ethernet52/1']
+    pod1:
+      filter:
+        tenants: ['TENANT_A', 'TENANT_A']
+        tags: ['l2_only', 'leaf3', 'l2_only', 'leaf4']
+      bgp_as: 65102
+      nodes:
+        leaf3:
+          id: 3
+          mgmt_ip: 192.168.123.23/24
+          platform: cEOS
+          uplink_switches: ['spine1', 'spine2']
+          uplink_interfaces: ['Ethernet49/1', 'Ethernet50/1']
+          uplink_switch_interfaces: ['Ethernet3/1', 'Ethernet3/1']
+          mac_address: '0c:1d:c0:1d:62:23'
+          mlag_interfaces: ['Ethernet51/1', 'Ethernet52/1']
+        leaf4:
+          id: 4
+          mgmt_ip: 192.168.123.24/24
+          platform: cEOS
+          uplink_switches: ['spine1', 'spine2']
+          uplink_interfaces: ['Ethernet49/1', 'Ethernet50/1']
+          uplink_switch_interfaces: ['Ethernet4/1', 'Ethernet4/1']
+          mac_address: '0c:1d:c0:1d:62:24'
+          mlag_interfaces: ['Ethernet51/1', 'Ethernet52/1']
+
+p2p_uplinks_mtu: 1500
+
+
+platform_settings:
+  - platforms: ["cEOS"]
+    management_interface: Management0
+    reload_delay:
+      mlag: 300
+      non_mlag: 330
+    feature_support:
+      queue_monitor_length_notify: false
+      interface_storm_control: false

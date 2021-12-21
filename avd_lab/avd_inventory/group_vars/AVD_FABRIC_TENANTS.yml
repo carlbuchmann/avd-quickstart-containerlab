@@ -1,0 +1,29 @@
+tenants:
+  TENANT_A:
+    mac_vrf_vni_base: 10000
+    vrfs:
+      TEST_VRF:
+        vrf_vni: 10
+        vtep_diagnostic:
+          loopback: 100
+          loopback_ip_range: 10.255.1.0/24
+        svis:
+          # add VLANs and SVIs from CSV
+          100:
+            name: TENANT_A_BGP_TO_COMPUTE
+            tags: ['leaf1', 'leaf2']
+            enabled: true
+            ip_address_virtual: 10.100.100.1/24
+            
+            
+          150:
+            name: TENANT_A_BGP_TO_COMPUTE
+            tags: ['leaf3', 'leaf4']
+            enabled: true
+            ip_address_virtual: 10.100.150.1/24
+            
+            
+    l2vlans:
+      200:
+        name: TENANT_A_TEST_L2_ONLY_VLAN
+        tags: ['l2_only']

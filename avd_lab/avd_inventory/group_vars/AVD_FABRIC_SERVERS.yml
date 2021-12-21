@@ -1,0 +1,55 @@
+---
+port_profiles:
+  ACCESS_PROFILE:
+    mode: access
+    vlans: 200
+  VLAN150_PROFILE:
+    mode: access
+    vlans: 150
+  TRUNK_PROFILE:
+    mode: trunk
+    vlans: 100-150,200
+
+servers:
+    # NOTE: the server template does not support multiple adapters
+    # just create a server with a different name prefix/postfix instead
+  host11:
+    rack: pod1_rack
+    adapters:
+    - switch_ports: ['Ethernet1/1', 'Ethernet1/1']
+      switches: ['leaf1', 'leaf2']
+      endpoint_ports: [ leaf1_Ethernet1/1,leaf2_Ethernet1/1, ]
+      profile: ACCESS_PROFILE
+      port_channel:
+        description: leaf1_to_host11
+        mode: active
+  host12:
+    rack: pod1_rack
+    adapters:
+    - switch_ports: ['Ethernet1/2', 'Ethernet1/2']
+      switches: ['leaf1', 'leaf2']
+      endpoint_ports: [ leaf1_Ethernet1/2,leaf2_Ethernet1/2, ]
+      profile: TRUNK_PROFILE
+      port_channel:
+        description: leaf3_to_host12
+        mode: active
+  host21:
+    rack: pod2_rack
+    adapters:
+    - switch_ports: ['Ethernet1/1', 'Ethernet1/1']
+      switches: ['leaf3', 'leaf4']
+      endpoint_ports: [ leaf3_Ethernet1/1,leaf4_Ethernet1/1, ]
+      profile: ACCESS_PROFILE
+      port_channel:
+        description: leaf3_to_host21
+        mode: active
+  host22:
+    rack: pod2_rack
+    adapters:
+    - switch_ports: ['Ethernet1/2', 'Ethernet1/2']
+      switches: ['leaf3', 'leaf4']
+      endpoint_ports: [ leaf3_Ethernet1/2,leaf4_Ethernet1/2, ]
+      profile: VLAN150_PROFILE
+      port_channel:
+        description: leaf3_to_host22
+        mode: active

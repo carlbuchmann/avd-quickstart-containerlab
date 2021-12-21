@@ -1,0 +1,648 @@
+ansible_connection: httpapi
+ansible_network_os: eos
+ansible_user: cvpadmin
+ansible_password: arista123
+ansible_become: true
+ansible_become_method: enable
+validation_mode_loose: true
+ansible_httpapi_use_ssl: true
+ansible_httpapi_validate_certs: false
+ansible_python_interpreter: $(which python3)
+output_format:
+- text
+- markdown
+- json
+- yaml
+commands_list:
+- show lldp neighbors
+- show ip interface brief
+- show interfaces description
+- show version
+- show running-config
+- show ip bgp summary
+- show bgp evpn summary
+mgmt_gateway: 192.168.123.1
+mgmt_interface_vrf: MGMT
+management_security:
+  password:
+    encryption_key_common: true
+local_users:
+  cvpadmin:
+    privilege: 15
+    role: network-admin
+    sha512_password: $6$aQjjIocu2Pxl0baz$.3hUsqFqET6CHtNoc2nKIrmwPY39NYBaG.l2dX1hmiUc46lWorrG7V25b5XeqwSCJnRs4pOe9teK1/5RK8mve/
+cvp_instance_ips:
+- 192.168.122.241
+cvp_ingestauth_key: qwerty
+name_servers:
+- 8.8.8.8
+ntp:
+  local_interface:
+    name: Management0
+    vrf: MGMT
+  servers:
+  - name: time1.google.com
+    vrf: MGMT
+  - name: time2.google.com
+    vrf: MGMT
+  - name: time3.google.com
+    vrf: MGMT
+dns_domain: lab.net
+fabric_name: AVD_FABRIC
+underlay_routing_protocol: BGP
+vxlan_vlan_aware_bundles: false
+bgp_peer_groups:
+  IPv4_UNDERLAY_PEERS:
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+  EVPN_OVERLAY_PEERS:
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+  MLAG_IPv4_UNDERLAY_PEER:
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+spine:
+  defaults:
+    loopback_ipv4_pool: 192.0.255.0/25
+  nodes:
+    spine1:
+      id: 1
+      mgmt_ip: 192.168.123.11/24
+      platform: cEOS
+      bgp_as: 65001
+      mac_address: 0c:1d:c0:1d:62:11
+    spine2:
+      id: 2
+      mgmt_ip: 192.168.123.12/24
+      platform: cEOS
+      bgp_as: 65001
+      mac_address: 0c:1d:c0:1d:62:12
+l3leaf:
+  defaults:
+    max_parallel_uplinks: 8
+    max_uplink_switches: 4
+    loopback_ipv4_pool: 192.0.255.128/25
+    vtep_loopback_ipv4_pool: 192.0.254.0/24
+    uplink_ipv4_pool: 172.31.255.0/24
+    mlag_peer_ipv4_pool: 10.255.252.0/24
+    mlag_peer_l3_ipv4_pool: 10.255.251.0/24
+    virtual_router_mac_address: 00:1c:73:00:dc:01
+    spanning_tree_priority: 4096
+    spanning_tree_mode: mstp
+  node_groups:
+    pod0:
+      filter:
+        tenants:
+        - TENANT_A
+        - TENANT_A
+        tags:
+        - leaf1
+        - l2_only
+        - leaf2
+        - l2_only
+      bgp_as: 65101
+      nodes:
+        leaf1:
+          id: 1
+          mgmt_ip: 192.168.123.21/24
+          platform: cEOS
+          uplink_switches:
+          - spine1
+          - spine2
+          uplink_interfaces:
+          - Ethernet49/1
+          - Ethernet50/1
+          uplink_switch_interfaces:
+          - Ethernet1/1
+          - Ethernet1/1
+          mac_address: 0c:1d:c0:1d:62:21
+          mlag_interfaces:
+          - Ethernet51/1
+          - Ethernet52/1
+        leaf2:
+          id: 2
+          mgmt_ip: 192.168.123.22/24
+          platform: cEOS
+          uplink_switches:
+          - spine1
+          - spine2
+          uplink_interfaces:
+          - Ethernet49/1
+          - Ethernet50/1
+          uplink_switch_interfaces:
+          - Ethernet2/1
+          - Ethernet2/1
+          mac_address: 0c:1d:c0:1d:62:22
+          mlag_interfaces:
+          - Ethernet51/1
+          - Ethernet52/1
+    pod1:
+      filter:
+        tenants:
+        - TENANT_A
+        - TENANT_A
+        tags:
+        - l2_only
+        - leaf3
+        - l2_only
+        - leaf4
+      bgp_as: 65102
+      nodes:
+        leaf3:
+          id: 3
+          mgmt_ip: 192.168.123.23/24
+          platform: cEOS
+          uplink_switches:
+          - spine1
+          - spine2
+          uplink_interfaces:
+          - Ethernet49/1
+          - Ethernet50/1
+          uplink_switch_interfaces:
+          - Ethernet3/1
+          - Ethernet3/1
+          mac_address: 0c:1d:c0:1d:62:23
+          mlag_interfaces:
+          - Ethernet51/1
+          - Ethernet52/1
+        leaf4:
+          id: 4
+          mgmt_ip: 192.168.123.24/24
+          platform: cEOS
+          uplink_switches:
+          - spine1
+          - spine2
+          uplink_interfaces:
+          - Ethernet49/1
+          - Ethernet50/1
+          uplink_switch_interfaces:
+          - Ethernet4/1
+          - Ethernet4/1
+          mac_address: 0c:1d:c0:1d:62:24
+          mlag_interfaces:
+          - Ethernet51/1
+          - Ethernet52/1
+p2p_uplinks_mtu: 1500
+platform_settings:
+- platforms:
+  - cEOS
+  management_interface: Management0
+  reload_delay:
+    mlag: 300
+    non_mlag: 330
+  feature_support:
+    queue_monitor_length_notify: false
+    interface_storm_control: false
+port_profiles:
+  ACCESS_PROFILE:
+    mode: access
+    vlans: 200
+  VLAN150_PROFILE:
+    mode: access
+    vlans: 150
+  TRUNK_PROFILE:
+    mode: trunk
+    vlans: 100-150,200
+servers:
+  host11:
+    rack: pod1_rack
+    adapters:
+    - switch_ports:
+      - Ethernet1/1
+      - Ethernet1/1
+      switches:
+      - leaf1
+      - leaf2
+      endpoint_ports:
+      - leaf1_Ethernet1/1
+      - leaf2_Ethernet1/1
+      profile: ACCESS_PROFILE
+      port_channel:
+        description: leaf1_to_host11
+        mode: active
+  host12:
+    rack: pod1_rack
+    adapters:
+    - switch_ports:
+      - Ethernet1/2
+      - Ethernet1/2
+      switches:
+      - leaf1
+      - leaf2
+      endpoint_ports:
+      - leaf1_Ethernet1/2
+      - leaf2_Ethernet1/2
+      profile: TRUNK_PROFILE
+      port_channel:
+        description: leaf3_to_host12
+        mode: active
+  host21:
+    rack: pod2_rack
+    adapters:
+    - switch_ports:
+      - Ethernet1/1
+      - Ethernet1/1
+      switches:
+      - leaf3
+      - leaf4
+      endpoint_ports:
+      - leaf3_Ethernet1/1
+      - leaf4_Ethernet1/1
+      profile: ACCESS_PROFILE
+      port_channel:
+        description: leaf3_to_host21
+        mode: active
+  host22:
+    rack: pod2_rack
+    adapters:
+    - switch_ports:
+      - Ethernet1/2
+      - Ethernet1/2
+      switches:
+      - leaf3
+      - leaf4
+      endpoint_ports:
+      - leaf3_Ethernet1/2
+      - leaf4_Ethernet1/2
+      profile: VLAN150_PROFILE
+      port_channel:
+        description: leaf3_to_host22
+        mode: active
+tenants:
+  TENANT_A:
+    mac_vrf_vni_base: 10000
+    vrfs:
+      TEST_VRF:
+        vrf_vni: 10
+        vtep_diagnostic:
+          loopback: 100
+          loopback_ip_range: 10.255.1.0/24
+        svis:
+          100:
+            name: TENANT_A_BGP_TO_COMPUTE
+            tags:
+            - leaf1
+            - leaf2
+            enabled: true
+            ip_address_virtual: 10.100.100.1/24
+          150:
+            name: TENANT_A_BGP_TO_COMPUTE
+            tags:
+            - leaf3
+            - leaf4
+            enabled: true
+            ip_address_virtual: 10.100.150.1/24
+    l2vlans:
+      200:
+        name: TENANT_A_TEST_L2_ONLY_VLAN
+        tags:
+        - l2_only
+type: l3leaf
+inventory_file: /home/avd/projects/avd_lab/avd_inventory/inventory.yml
+inventory_dir: /home/avd/projects/avd_lab/avd_inventory
+ansible_host: 192.168.123.22
+inventory_hostname: leaf2
+inventory_hostname_short: leaf2
+group_names:
+- AVD_FABRIC
+- AVD_FABRIC_SERVERS
+- AVD_FABRIC_TENANTS
+- AVD_LAB
+- LEAFS
+ansible_facts:
+  switch:
+    type: l3leaf
+    node_type_key: l3leaf
+    connected_endpoints: true
+    default_evpn_role: client
+    mlag_support: true
+    network_services_l2: true
+    network_services_l3: true
+    underlay_router: true
+    uplink_type: p2p
+    vtep: true
+    ip_addressing:
+      router_id: ip_addressing/router-id.j2
+      mlag_ip_primary: ip_addressing/mlag-ip-primary.j2
+      mlag_ip_secondary: ip_addressing/mlag-ip-secondary.j2
+      mlag_l3_ip_primary: ip_addressing/mlag-l3-ip-primary.j2
+      mlag_l3_ip_secondary: ip_addressing/mlag-l3-ip-secondary.j2
+      p2p_uplinks_ip: ip_addressing/p2p-uplinks-ip.j2
+      p2p_uplinks_peer_ip: ip_addressing/p2p-uplinks-peer-ip.j2
+      vtep_ip_mlag: ip_addressing/vtep-ip-mlag.j2
+      vtep_ip: ip_addressing/vtep-ip.j2
+    interface_descriptions:
+      underlay_ethernet_interfaces: interface_descriptions/underlay/ethernet-interfaces.j2
+      underlay_port_channel_interfaces: interface_descriptions/underlay/port-channel-interfaces.j2
+      mlag_ethernet_interfaces: interface_descriptions/mlag/ethernet-interfaces.j2
+      mlag_port_channel_interfaces: interface_descriptions/mlag/port-channel-interfaces.j2
+      connected_endpoints_ethernet_interfaces: interface_descriptions/connected_endpoints/ethernet-interfaces.j2
+      connected_endpoints_port_channel_interfaces: interface_descriptions/connected_endpoints/port-channel-interfaces.j2
+      overlay_loopback_interface: interface_descriptions/loopback_interfaces/overlay-loopback.j2
+      vtep_loopback_interface: interface_descriptions/loopback_interfaces/vtep-loopback.j2
+    group: pod0
+    id: 2
+    mgmt_ip: 192.168.123.22/24
+    mgmt_interface: Management1
+    platform: cEOS
+    platform_settings:
+      platforms:
+      - cEOS
+      management_interface: Management0
+      reload_delay:
+        mlag: 300
+        non_mlag: 330
+      feature_support:
+        queue_monitor_length_notify: false
+        interface_storm_control: false
+    underlay_routing_protocol: ebgp
+    overlay_routing_protocol: ebgp
+    filter_tenants:
+    - TENANT_A
+    - TENANT_A
+    filter_tags:
+    - leaf1
+    - l2_only
+    - leaf2
+    - l2_only
+    spanning_tree_mode: mstp
+    spanning_tree_priority: 4096
+    igmp_snooping_enabled: true
+    virtual_router_mac_address: 00:1c:73:00:dc:01
+    max_uplink_switches: 4
+    max_parallel_uplinks: 8
+    uplink_switches:
+    - spine1
+    - spine2
+    uplink_switch_interfaces:
+    - Ethernet2/1
+    - Ethernet2/1
+    uplink_interfaces:
+    - Ethernet49/1
+    - Ethernet50/1
+    loopback_ipv4_pool: 192.0.255.128/25
+    loopback_ipv4_offset: 0
+    uplink_ipv4_pool: 172.31.255.0/24
+    router_id: 192.0.255.130
+    bgp_as: '65101'
+    bgp_defaults: []
+    evpn_role: client
+    evpn_route_servers:
+    - spine1
+    - spine2
+    mlag: true
+    mlag_group: pod0
+    mlag_ibgp_origin_incomplete: true
+    mlag_peer_vlan: 4094
+    mlag_peer_link_allowed_vlans: 2-4094
+    mlag_dual_primary_detection: false
+    mlag_interfaces:
+    - Ethernet51/1
+    - Ethernet52/1
+    mlag_l3: true
+    mlag_peer_l3_vlan: 4093
+    mlag_role: secondary
+    mlag_peer: leaf1
+    mlag_peer_mgmt_ip: 192.168.123.21
+    mlag_ip: 10.255.252.1
+    mlag_peer_ip: 10.255.252.0
+    mlag_l3_ip: 10.255.251.1
+    mlag_peer_l3_ip: 10.255.251.0
+    vtep_loopback_ipv4_pool: 192.0.254.0/24
+    vtep_loopback: Loopback1
+    vtep_ip: 192.0.254.1
+    tenants:
+      TENANT_A:
+        vrfs:
+          TEST_VRF:
+            svis:
+            - 100
+        l2vlans:
+        - 200
+    vlans:
+    - 100
+    - 200
+  topology:
+    links:
+      Ethernet49/1:
+        peer: spine1
+        peer_interface: Ethernet2/1
+        peer_type: spine
+        peer_bgp_as: '65001'
+        type: underlay_p2p
+        ip_address: 172.31.255.65
+        peer_ip_address: 172.31.255.64
+      Ethernet50/1:
+        peer: spine2
+        peer_interface: Ethernet2/1
+        peer_type: spine
+        peer_bgp_as: '65001'
+        type: underlay_p2p
+        ip_address: 172.31.255.67
+        peer_ip_address: 172.31.255.66
+    peers:
+    - spine1
+    - spine2
+    vlans:
+    - 100
+    - 200
+switch:
+  type: l3leaf
+  node_type_key: l3leaf
+  connected_endpoints: true
+  default_evpn_role: client
+  mlag_support: true
+  network_services_l2: true
+  network_services_l3: true
+  underlay_router: true
+  uplink_type: p2p
+  vtep: true
+  ip_addressing:
+    router_id: ip_addressing/router-id.j2
+    mlag_ip_primary: ip_addressing/mlag-ip-primary.j2
+    mlag_ip_secondary: ip_addressing/mlag-ip-secondary.j2
+    mlag_l3_ip_primary: ip_addressing/mlag-l3-ip-primary.j2
+    mlag_l3_ip_secondary: ip_addressing/mlag-l3-ip-secondary.j2
+    p2p_uplinks_ip: ip_addressing/p2p-uplinks-ip.j2
+    p2p_uplinks_peer_ip: ip_addressing/p2p-uplinks-peer-ip.j2
+    vtep_ip_mlag: ip_addressing/vtep-ip-mlag.j2
+    vtep_ip: ip_addressing/vtep-ip.j2
+  interface_descriptions:
+    underlay_ethernet_interfaces: interface_descriptions/underlay/ethernet-interfaces.j2
+    underlay_port_channel_interfaces: interface_descriptions/underlay/port-channel-interfaces.j2
+    mlag_ethernet_interfaces: interface_descriptions/mlag/ethernet-interfaces.j2
+    mlag_port_channel_interfaces: interface_descriptions/mlag/port-channel-interfaces.j2
+    connected_endpoints_ethernet_interfaces: interface_descriptions/connected_endpoints/ethernet-interfaces.j2
+    connected_endpoints_port_channel_interfaces: interface_descriptions/connected_endpoints/port-channel-interfaces.j2
+    overlay_loopback_interface: interface_descriptions/loopback_interfaces/overlay-loopback.j2
+    vtep_loopback_interface: interface_descriptions/loopback_interfaces/vtep-loopback.j2
+  group: pod0
+  id: 2
+  mgmt_ip: 192.168.123.22/24
+  mgmt_interface: Management1
+  platform: cEOS
+  platform_settings:
+    platforms:
+    - cEOS
+    management_interface: Management0
+    reload_delay:
+      mlag: 300
+      non_mlag: 330
+    feature_support:
+      queue_monitor_length_notify: false
+      interface_storm_control: false
+  underlay_routing_protocol: ebgp
+  overlay_routing_protocol: ebgp
+  filter_tenants:
+  - TENANT_A
+  - TENANT_A
+  filter_tags:
+  - leaf1
+  - l2_only
+  - leaf2
+  - l2_only
+  spanning_tree_mode: mstp
+  spanning_tree_priority: 4096
+  igmp_snooping_enabled: true
+  virtual_router_mac_address: 00:1c:73:00:dc:01
+  max_uplink_switches: 4
+  max_parallel_uplinks: 8
+  uplink_switches:
+  - spine1
+  - spine2
+  uplink_switch_interfaces:
+  - Ethernet2/1
+  - Ethernet2/1
+  uplink_interfaces:
+  - Ethernet49/1
+  - Ethernet50/1
+  loopback_ipv4_pool: 192.0.255.128/25
+  loopback_ipv4_offset: 0
+  uplink_ipv4_pool: 172.31.255.0/24
+  router_id: 192.0.255.130
+  bgp_as: '65101'
+  bgp_defaults: []
+  evpn_role: client
+  evpn_route_servers:
+  - spine1
+  - spine2
+  mlag: true
+  mlag_group: pod0
+  mlag_ibgp_origin_incomplete: true
+  mlag_peer_vlan: 4094
+  mlag_peer_link_allowed_vlans: 2-4094
+  mlag_dual_primary_detection: false
+  mlag_interfaces:
+  - Ethernet51/1
+  - Ethernet52/1
+  mlag_l3: true
+  mlag_peer_l3_vlan: 4093
+  mlag_role: secondary
+  mlag_peer: leaf1
+  mlag_peer_mgmt_ip: 192.168.123.21
+  mlag_ip: 10.255.252.1
+  mlag_peer_ip: 10.255.252.0
+  mlag_l3_ip: 10.255.251.1
+  mlag_peer_l3_ip: 10.255.251.0
+  vtep_loopback_ipv4_pool: 192.0.254.0/24
+  vtep_loopback: Loopback1
+  vtep_ip: 192.0.254.1
+  tenants:
+    TENANT_A:
+      vrfs:
+        TEST_VRF:
+          svis:
+          - 100
+      l2vlans:
+      - 200
+  vlans:
+  - 100
+  - 200
+topology:
+  links:
+    Ethernet49/1:
+      peer: spine1
+      peer_interface: Ethernet2/1
+      peer_type: spine
+      peer_bgp_as: '65001'
+      type: underlay_p2p
+      ip_address: 172.31.255.65
+      peer_ip_address: 172.31.255.64
+    Ethernet50/1:
+      peer: spine2
+      peer_interface: Ethernet2/1
+      peer_type: spine
+      peer_bgp_as: '65001'
+      type: underlay_p2p
+      ip_address: 172.31.255.67
+      peer_ip_address: 172.31.255.66
+  peers:
+  - spine1
+  - spine2
+  vlans:
+  - 100
+  - 200
+playbook_dir: /home/avd/projects/avd_lab/playbooks
+ansible_playbook_python: /usr/local/bin/python
+ansible_config_file: /home/avd/projects/avd_lab/ansible.cfg
+groups:
+  all:
+  - CV_AVD_FABRIC
+  - CV_SSH_FOR_DHCP_CONF
+  - spine1
+  - spine2
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
+  ungrouped: []
+  CV_SERVERS:
+  - CV_AVD_FABRIC
+  DHCP_CONF:
+  - CV_SSH_FOR_DHCP_CONF
+  AVD_LAB:
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
+  - spine1
+  - spine2
+  AVD_FABRIC:
+  - spine1
+  - spine2
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
+  SPINES:
+  - spine1
+  - spine2
+  LEAFS:
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
+  AVD_FABRIC_TENANTS:
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
+  AVD_FABRIC_SERVERS:
+  - leaf1
+  - leaf2
+  - leaf3
+  - leaf4
+omit: __omit_place_holder__dc79e6b02a9f2ef1347805271543bec8e52a9418
+ansible_version:
+  string: 2.12.1
+  full: 2.12.1
+  major: 2
+  minor: 12
+  revision: 1
+ansible_check_mode: false
+ansible_diff_mode: false
+ansible_forks: 5
+ansible_inventory_sources:
+- /home/avd/projects/avd_lab/avd_inventory/inventory.yml
+ansible_skip_tags: []
+ansible_run_tags:
+- build
+- debug
+ansible_verbosity: 0

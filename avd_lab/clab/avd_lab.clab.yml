@@ -1,0 +1,66 @@
+name: avd_lab
+
+mgmt:
+  network: custom_mgmt
+  ipv4_subnet: 192.168.123.0/24
+
+topology:
+  kinds:
+    ceos:
+      startup-config: init-configs/ceos-cfg.j2
+      image: ceos-lab:4.27.1F
+    # linux:
+    #   image: alpine-host
+  defaults:
+    kind: ceos
+  nodes:
+    spine1:
+      mgmt_ipv4: 192.168.123.11
+    spine2:
+      mgmt_ipv4: 192.168.123.12
+    leaf1:
+      mgmt_ipv4: 192.168.123.21
+    leaf2:
+      mgmt_ipv4: 192.168.123.22
+    leaf3:
+      mgmt_ipv4: 192.168.123.23
+    leaf4:
+      mgmt_ipv4: 192.168.123.24
+    host11:
+      mgmt_ipv4: 192.168.123.111
+      kind: ceos
+      startup-config: init-configs/host11.j2
+    host12:
+      mgmt_ipv4: 192.168.123.112
+      kind: ceos
+      startup-config: init-configs/host12.j2
+    host21:
+      mgmt_ipv4: 192.168.123.121
+      kind: ceos
+      startup-config: init-configs/host21.j2
+    host22:
+      mgmt_ipv4: 192.168.123.122
+      kind: ceos
+      startup-config: init-configs/host22.j2
+
+  links:
+  - endpoints: ["spine1:eth1_1", "leaf1:eth49_1"]
+  - endpoints: ["spine1:eth2_1", "leaf2:eth49_1"]
+  - endpoints: ["spine1:eth3_1", "leaf3:eth49_1"]
+  - endpoints: ["spine1:eth4_1", "leaf4:eth49_1"]
+  - endpoints: ["spine2:eth1_1", "leaf1:eth50_1"]
+  - endpoints: ["spine2:eth2_1", "leaf2:eth50_1"]
+  - endpoints: ["spine2:eth3_1", "leaf3:eth50_1"]
+  - endpoints: ["spine2:eth4_1", "leaf4:eth50_1"]
+  - endpoints: ["leaf1:eth51_1", "leaf2:eth51_1"]
+  - endpoints: ["leaf1:eth52_1", "leaf2:eth52_1"]
+  - endpoints: ["leaf3:eth51_1", "leaf4:eth51_1"]
+  - endpoints: ["leaf3:eth52_1", "leaf4:eth52_1"]
+  - endpoints: ["host11:eth1", "leaf1:eth1_1"]
+  - endpoints: ["host11:eth2", "leaf2:eth1_1"]
+  - endpoints: ["host12:eth1", "leaf1:eth1_2"]
+  - endpoints: ["host12:eth2", "leaf2:eth1_2"]
+  - endpoints: ["host21:eth1", "leaf3:eth1_1"]
+  - endpoints: ["host21:eth2", "leaf4:eth1_1"]
+  - endpoints: ["host22:eth1", "leaf3:eth1_2"]
+  - endpoints: ["host22:eth2", "leaf4:eth1_2"]
